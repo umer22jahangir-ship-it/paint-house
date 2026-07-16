@@ -92,6 +92,13 @@ async function main() {
   }
 
   for (const table of TABLES) {
+    const tableExists = localDb
+      .prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`)
+      .get(table.name);
+    if (!tableExists) {
+      console.log(`Skipping ${table.name} (no local table found)`);
+      continue;
+    }
     const rows = localDb.prepare(`SELECT * FROM ${table.name}`).all();
     console.log(`Migrating ${rows.length} row(s) from ${table.name}...`);
     for (const row of rows) {
